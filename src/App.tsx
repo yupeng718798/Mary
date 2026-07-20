@@ -6,6 +6,18 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [backendMsg, setBackendMsg] = useState('')
+
+  const handleClick = async () => {
+    setCount((count) => count + 1)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/test`)
+      const data = await res.text()
+      setBackendMsg(data)
+    } catch (err) {
+      setBackendMsg('请求失败: ' + (err as Error).message)
+    }
+  }
 
   return (
     <>
@@ -24,10 +36,15 @@ function App() {
         <button
           type="button"
           className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={handleClick}
         >
           Count is {count}
         </button>
+        {backendMsg && (
+          <p style={{ marginTop: '12px', color: '#4caf50' }}>
+            后端返回: {backendMsg}
+          </p>
+        )}
       </section>
 
       <div className="ticks"></div>
