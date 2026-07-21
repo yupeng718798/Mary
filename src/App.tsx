@@ -4,9 +4,17 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
 
+interface User {
+  id: number
+  name: string
+  email: string
+}
+
 function App() {
   const [count, setCount] = useState(0)
   const [backendMsg, setBackendMsg] = useState('')
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(false)
 
   const handleClick = async () => {
     setCount((count) => count + 1)
@@ -16,6 +24,19 @@ function App() {
       setBackendMsg(data)
     } catch (err) {
       setBackendMsg('请求失败: ' + (err as Error).message)
+    }
+  }
+
+  const fetchUsers = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`)
+      const data = await res.json()
+      setUsers(data)
+    } catch (err) {
+      console.error('获取用户失败:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -44,6 +65,38 @@ function App() {
           <p style={{ marginTop: '12px', color: '#4caf50' }}>
             后端返回: {backendMsg}
           </p>
+        )}
+        <button
+          type="button"
+          className="counter"
+          onClick={fetchUsers}
+          disabled={loading}
+          style={{ marginTop: '12px' }}
+        >
+          {loading ? '加载中...' : '获取用户列表'}
+        </button>
+        {users.length > 0 && (
+          <div style={{ marginTop: '16px', textAlign: 'left' }}>
+            <h3>用户列表</h3>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr>
+                  <th style={{ border: '1px solid #ddd', padding: '8px' }}>ID</th>
+                  <th style={{ border: '1px solid #ddd', padding: '8px' }}>姓名</th>
+                  <th style={{ border: '1px solid #ddd', padding: '8px' }}>邮箱</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.id}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.name}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
