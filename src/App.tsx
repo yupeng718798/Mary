@@ -2,6 +2,7 @@ import { BrowserRouter, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import AppRouter from './router';
+import { AppProvider } from './context/AppContext';
 
 function Layout() {
   const location = useLocation();
@@ -26,8 +27,10 @@ function Layout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Layout />
-    </BrowserRouter>
+    <AppProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
+    </AppProvider>
   );
 }
