@@ -37,8 +37,12 @@ export default function MedicalRecords() {
       formData.append('user_id', userId);
       formData.append('record_type', file.type.includes('pdf') ? 'pdf' : 'image');
       formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
-      await medicalApi.upload(formData);
+      const record = await medicalApi.upload(formData);
       await loadRecords();
+      // 上传成功后自动分析
+      if (record?.id) {
+        handleAnalyze(record.id);
+      }
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
