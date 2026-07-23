@@ -20,7 +20,6 @@ export default function Dashboard() {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +35,7 @@ export default function Dashboard() {
         setConsultations(cons);
         setMedications(meds);
       } finally {
-        if (!cancelled) setLoading(false);
+        // loaded
       }
     };
     load();

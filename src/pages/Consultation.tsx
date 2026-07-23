@@ -16,7 +16,6 @@ export default function ConsultationPage() {
   const [symptoms, setSymptoms] = useState('');
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(false);
-  const [listLoading, setListLoading] = useState(true);
 
   const loadConsultations = async () => {
     try {
@@ -25,7 +24,7 @@ export default function ConsultationPage() {
     } catch {
       setConsultations([]);
     } finally {
-      setListLoading(false);
+      // loaded
     }
   };
 

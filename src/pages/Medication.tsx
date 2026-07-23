@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext';
 import { medicationApi, diaryApi } from '../api/services';
 import type { Medication, SymptomDiary } from '../api/services';
 import {
-  ScanLine,
   CheckCircle2,
   Clock,
   Clock4,
@@ -14,7 +13,6 @@ import {
   Plus,
   Flame,
   Moon,
-  Utensils,
   Smile,
 } from 'lucide-react';
 
@@ -22,7 +20,6 @@ export default function MedicationPage() {
   const { userId } = useApp();
   const [medications, setMedications] = useState<Medication[]>([]);
   const [diaries, setDiaries] = useState<SymptomDiary[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMed, setNewMed] = useState({
     medicine_name: '',
@@ -42,8 +39,6 @@ export default function MedicationPage() {
     } catch {
       setMedications([]);
       setDiaries([]);
-    } finally {
-      setLoading(false);
     }
   };
 

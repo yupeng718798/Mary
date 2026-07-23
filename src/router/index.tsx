@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import MedicalRecords from '../pages/MedicalRecords';
@@ -17,9 +17,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppRouter() {
-  const location = useLocation();
-  const isLogin = location.pathname === '/';
-
   return (
     <>
       <Routes>
