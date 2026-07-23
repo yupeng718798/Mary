@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
-  medicalApi,
-  consultationApi,
-  medicationApi,
-} from '../api/services';
+  Bell,
+  FileText,
+  MapPin,
+  Pill,
+  BookOpen,
+  ClipboardList,
+  Clock,
+  TrendingUp,
+} from 'lucide-react';
+import { medicalApi, consultationApi, medicationApi } from '../api/services';
 import type { MedicalRecord, Consultation, Medication } from '../api/services';
 
 export default function Dashboard() {
   const { userId, userName, bootstrapError } = useApp();
+  const navigate = useNavigate();
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -37,97 +45,166 @@ export default function Dashboard() {
     };
   }, [userId]);
 
-  const stats = [
-    { title: 'Medical Records', count: records.length, desc: `${records.filter(r => r.status === 'analyzed').length} analyzed`, icon: '📄', color: '#dbeafe' },
-    { title: 'Consultations', count: consultations.length, desc: consultations.length ? 'Doctor prep ready' : 'No consultations yet', icon: '💬', color: '#dcfce7' },
-    { title: 'Medications', count: medications.length, desc: medications.length ? 'active medications' : 'No medications', icon: '💊', color: '#fef3c7' },
+  const quickActions = [
+    {
+      icon: FileText,
+      label: '病历管理',
+      desc: '上传与分析病历',
+      path: '/records',
+    },
+    {
+      icon: MapPin,
+      label: '问诊导航',
+      desc: '就医流程指引',
+      path: '/consultation',
+    },
+    {
+      icon: Pill,
+      label: '药物管理',
+      desc: '药品信息与提醒',
+      path: '/medication',
+    },
+    {
+      icon: BookOpen,
+      label: '症状日记',
+      desc: '每日健康记录',
+      path: '/medication',
+    },
   ];
 
-  return (
-    <div>
-      <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', color: '#1e293b' }}>
-        Welcome back, {userName}
-      </h2>
-      <p style={{ color: '#64748b', marginBottom: '32px' }}>Your AI Health Assistant</p>
+  const pendingCount = records.filter((r) => r.status === 'pending').length;
+  const nextReminder = medications[0]?.reminder_time || '暂无';
 
-      {bootstrapError && (
-        <div style={{
-          backgroundColor: '#fee2e2',
-          color: '#991b1b',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '24px',
-          fontSize: '14px',
-        }}>
-          ⚠️ Backend connection failed: {bootstrapError}
-          <div style={{ fontSize: '12px', marginTop: '4px', color: '#b91c1c' }}>
-            {loading ? 'Loading...' : 'Please start the backend or verify the API URL in VITE_API_BASE_URL'}
+  return (
+    <main className="pb-20">
+      {/* Greeting Header */}
+      <section className="px-4 pt-6 pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+              你好，{userName}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">今天感觉怎么样？</p>
+          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+            <Bell className="h-5 w-5 text-primary" />
           </div>
         </div>
+      </section>
+
+      {/* Backend Error Banner */}
+      {bootstrapError && (
+        <section className="px-4 mt-3">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+            <p className="text-xs text-destructive">
+              ⚠️ 后端连接失败: {bootstrapError}
+            </p>
+          </div>
+        </section>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '32px' }}>
-        {stats.map((stat) => (
-          <div key={stat.title} style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>{stat.icon}</div>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>{stat.title}</h3>
-            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3b82f6', marginBottom: '4px' }}>{stat.count}</p>
-            <p style={{ color: '#64748b', fontSize: '14px' }}>{stat.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: '#1e293b' }}>AI Agents</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #3b82f6',
-        }}>
-          <div style={{ fontSize: '32px', marginBottom: '12px' }}>🧠</div>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Medical Analysis Agent</h4>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>
-            {records.length ? `Latest: ${records[0].title} (${records[0].status})` : 'Upload a record to begin'}
-          </p>
+      {/* Quick Action Grid (2x2) */}
+      <section className="px-4 mt-4">
+        <h2 className="text-base font-semibold tracking-tight mb-3 text-foreground">
+          快捷功能
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {quickActions.map((action) => (
+            <button
+              key={action.label}
+              onClick={() => navigate(action.path)}
+              className="flex flex-col items-start rounded-lg p-4 transition-transform duration-150 hover:-translate-y-0.5 bg-card border border-border text-left"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                <action.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="mt-3 text-sm font-semibold truncate w-full text-foreground">
+                {action.label}
+              </h3>
+              <p className="mt-0.5 text-xs truncate w-full text-muted-foreground">
+                {action.desc}
+              </p>
+            </button>
+          ))}
         </div>
+      </section>
 
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #10b981',
-        }}>
-          <div style={{ fontSize: '32px', marginBottom: '12px' }}>🩺</div>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Consultation Agent</h4>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>
-            {consultations.length ? 'Questions prepared for doctor' : 'Describe symptoms to generate questions'}
-          </p>
-        </div>
+      {/* Health Summary Section */}
+      <section className="px-4 mt-6">
+        <h2 className="text-base font-semibold tracking-tight mb-3 text-foreground">
+          健康概览
+        </h2>
+        <div className="flex flex-col gap-3">
+          {/* 待分析报告 */}
+          <button
+            onClick={() => navigate('/records')}
+            className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border border-l-[3px] border-l-primary text-left transition-colors hover:bg-accent"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+              <ClipboardList className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-foreground">
+                待分析报告
+              </p>
+              <p className="text-xs mt-0.5 text-muted-foreground">
+                {pendingCount > 0
+                  ? `${pendingCount} 份报告等待 AI 分析`
+                  : '暂无待分析报告'}
+              </p>
+            </div>
+            {pendingCount > 0 && (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary">
+                <span className="text-xs font-semibold text-primary-foreground">
+                  {pendingCount}
+                </span>
+              </div>
+            )}
+          </button>
 
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          borderLeft: '4px solid #f59e0b',
-        }}>
-          <div style={{ fontSize: '32px', marginBottom: '12px' }}>💊</div>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>Medication Agent</h4>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>
-            {medications.length
-              ? `Reminder: ${medications[0].reminder_time || 'scheduled'}`
-              : 'Add medications to get reminders'}
-          </p>
+          {/* 今日服药提醒 */}
+          <button
+            onClick={() => navigate('/medication')}
+            className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border text-left transition-colors hover:bg-accent"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+              <Clock className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-foreground">
+                今日服药提醒
+              </p>
+              <p className="text-xs mt-0.5 text-muted-foreground">
+                {medications.length
+                  ? `下次服药：${nextReminder}`
+                  : '暂无药物提醒'}
+              </p>
+            </div>
+            <div className="h-4 w-4 shrink-0 text-muted-foreground">›</div>
+          </button>
+
+          {/* 症状记录 */}
+          <button
+            onClick={() => navigate('/consultation')}
+            className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border text-left transition-colors hover:bg-accent"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate text-foreground">
+                症状记录
+              </p>
+              <p className="text-xs mt-0.5 text-muted-foreground">
+                {consultations.length
+                  ? `${consultations.length} 条问诊记录`
+                  : '记录症状，获得 AI 建议'}
+              </p>
+            </div>
+            <div className="h-4 w-4 shrink-0 text-muted-foreground">›</div>
+          </button>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

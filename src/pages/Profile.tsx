@@ -1,111 +1,205 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { profileApi } from '../api/services';
+import { profileApi, medicalApi, medicationApi, diaryApi } from '../api/services';
 import type { Profile as ProfileType } from '../api/services';
+import {
+  FileText,
+  Pill,
+  Calendar,
+  Globe,
+  Bell,
+  Download,
+  Shield,
+  Info,
+  ChevronRight,
+  Edit2,
+  Check,
+  X,
+} from 'lucide-react';
 
-export default function Profile() {
-  const { userId } = useApp();
+export default function ProfilePage() {
+  const { userId, userName } = useApp();
   const [profile, setProfile] = useState<ProfileType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({ records: 0, medications: 0, diaries: 0 });
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Partial<ProfileType>>({});
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await profileApi.get(userId);
-        if (!cancelled) setProfile(data);
-      } catch (err: any) {
-        if (cancelled) return;
-        setError(err?.response?.data?.detail || err?.message || 'Failed to load profile');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  const handleSave = async () => {
-    if (!profile) return;
-    setSaving(true);
-    setError(null);
+  const loadData = async () => {
     try {
-      const updated = await profileApi.update(userId, {
-        full_name: profile.full_name,
-        phone: profile.phone,
-        emergency_contact: profile.emergency_contact,
-        language: profile.language,
+      const [prof, recs, meds, diaries] = await Promise.all([
+        profileApi.get(userId).catch(() => null),
+        medicalApi.list(userId).catch(() => []),
+        medicationApi.list(userId).catch(() => []),
+        diaryApi.list(userId).catch(() => []),
+      ]);
+      setProfile(prof);
+      setForm(prof || {});
+      setStats({
+        records: recs.length,
+        medications: meds.length,
+        diaries: diaries.length,
       });
-      setProfile(updated);
-    } catch (err: any) {
-      setError(err?.response?.data?.detail || err?.message || 'Failed to save');
-    } finally {
-      setSaving(false);
+    } catch {
+      // ignore
     }
   };
 
-  if (loading) return <div style={{ padding: '32px', color: '#64748b' }}>Loading profile...</div>;
+  useEffect(() => {
+    loadData();
+  }, [userId]);
 
-  const fields: Array<{ label: string; key: keyof ProfileType; type?: string }> = [
-    { label: 'Name', key: 'full_name' },
-    { label: 'Phone', key: 'phone' },
-    { label: 'Emergency Contact', key: 'emergency_contact' },
-    { label: 'Language', key: 'language' },
+  const handleSave = async () => {
+    if (!profile) {
+      await profileApi.create({ ...form, id: userId });
+    } else {
+      await profileApi.update(userId, form);
+    }
+    setEditing(false);
+    await loadData();
+  };
+
+  const displayName = profile?.full_name || userName || '用户';
+  const email = profile?.emergency_contact || 'user@email.com';
+
+  const statItems = [
+    { icon: FileText, label: '病历', count: stats.records },
+    { icon: Pill, label: '药品', count: stats.medications },
+    { icon: Calendar, label: '记录', count: stats.diaries },
+  ];
+
+  const settings = [
+    { icon: Globe, label: '语言设置', value: '中文' },
+    { icon: Bell, label: '通知提醒', toggle: true },
+    { icon: Download, label: '数据导出', value: '导出健康档案' },
+    { icon: Shield, label: '隐私设置' },
+    { icon: Info, label: '关于 Mary', value: '版本 1.0.0' },
   ];
 
   return (
-    <div>
-      <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '24px', color: '#1e293b' }}>
-        Profile
-      </h2>
-
-      {error && (
-        <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
-          {error}
-        </div>
-      )}
-
-      <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', maxWidth: '600px' }}>
-        {fields.map((field) => (
-          <div key={field.key as string} style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '500', color: '#64748b' }}>
-              {field.label}
-            </label>
-            <input
-              value={(profile?.[field.key] as string) ?? ''}
-              onChange={(e) => setProfile({ ...profile!, [field.key]: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '16px',
-                boxSizing: 'border-box',
-              }}
-            />
+    <main className="pb-20">
+      {/* Profile Header */}
+      <section className="px-4 pt-6 pb-4">
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-semibold">
+            {displayName.charAt(0)}
           </div>
-        ))}
+          <div className="min-w-0 flex-1">
+            {editing ? (
+              <div className="space-y-2">
+                <input
+                  className="input"
+                  placeholder="姓名"
+                  value={form.full_name || ''}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                />
+                <input
+                  className="input"
+                  placeholder="紧急联系人/邮箱"
+                  value={form.emergency_contact || ''}
+                  onChange={(e) =>
+                    setForm({ ...form, emergency_contact: e.target.value })
+                  }
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleSave} className="btn-primary gap-1 py-1.5 text-xs">
+                    <Check className="h-3 w-3" /> 保存
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditing(false);
+                      setForm(profile || {});
+                    }}
+                    className="btn-secondary gap-1 py-1.5 text-xs"
+                  >
+                    <X className="h-3 w-3" /> 取消
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-semibold text-foreground truncate">
+                    {displayName}
+                  </h1>
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <p className="mt-0.5 text-sm text-muted-foreground truncate">{email}</p>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
 
+      {/* Health Stats Row */}
+      <section className="px-4 pb-5">
+        <div className="grid grid-cols-3 gap-3">
+          {statItems.map((item) => (
+            <div
+              key={item.label}
+              className="flex flex-col items-center rounded-lg border border-border bg-card px-3 py-4"
+            >
+              <item.icon className="mb-1.5 h-5 w-5 shrink-0 text-primary" />
+              <span className="text-lg font-semibold text-foreground whitespace-nowrap">
+                {item.count} {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Settings List */}
+      <section className="px-4 pb-5">
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground tracking-wide">
+          设置
+        </h2>
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {settings.map((item, index) => (
+            <div
+              key={item.label}
+              className={`flex items-center gap-3 px-4 py-3.5 ${
+                index < settings.length - 1 ? 'border-b border-border' : ''
+              }`}
+            >
+              <item.icon className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 flex-1 text-sm text-foreground truncate">
+                {item.label}
+              </span>
+              {item.toggle ? (
+                <button
+                  type="button"
+                  className="relative h-6 w-11 shrink-0 rounded-full bg-primary transition-colors"
+                >
+                  <span className="absolute top-0.5 right-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" />
+                </button>
+              ) : (
+                <>
+                  {item.value && (
+                    <span className="shrink-0 text-sm text-muted-foreground">
+                      {item.value}
+                    </span>
+                  )}
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Logout Button */}
+      <section className="px-4 pb-8">
         <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: saving ? '#93c5fd' : '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            fontWeight: '600',
-          }}
+          type="button"
+          className="flex w-full items-center justify-center rounded-lg border border-destructive bg-transparent px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10"
         >
-          {saving ? 'Saving...' : 'Save Changes'}
+          退出登录
         </button>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
