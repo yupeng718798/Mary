@@ -154,7 +154,7 @@ export interface AgentLog {
 
 export const agentApi = {
   chat: (userId: string, message: string) =>
-    apiClient.post<AgentChatResponse>('/api/agent/chat', { user_id: userId, message }).then((r) => r.data),
+    apiClient.post<AgentChatResponse>('/api/agent/chat', { user_id: userId, message }, { timeout: 120000 }).then((r) => r.data),
   list: () =>
     apiClient.get<AgentInfo[]>('/api/agent/list').then((r) => r.data),
   logs: (userId: string) =>

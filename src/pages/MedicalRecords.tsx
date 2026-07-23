@@ -36,6 +36,7 @@ export default function MedicalRecords() {
       formData.append('file', file);
       formData.append('user_id', userId);
       formData.append('record_type', file.type.includes('pdf') ? 'pdf' : 'image');
+      formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
       await medicalApi.upload(formData);
       await loadRecords();
     } finally {
