@@ -5,6 +5,7 @@ import MedicalRecords from '../pages/MedicalRecords';
 import Consultation from '../pages/Consultation';
 import Medication from '../pages/Medication';
 import Profile from '../pages/Profile';
+import Chat from '../pages/Chat';
 import BottomNav from '../components/BottomNav';
 
 function MainLayout({ children }: { children: React.ReactNode }) {
@@ -58,6 +59,14 @@ export default function AppRouter() {
           element={
             <MainLayout>
               <Profile />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <MainLayout>
+              <Chat />
             </MainLayout>
           }
         />

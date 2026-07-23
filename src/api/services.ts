@@ -131,4 +131,34 @@ export const diaryApi = {
     apiClient.get<any[]>(`/api/diary/agent/logs/${userId}`).then((r) => r.data),
 };
 
+export interface AgentChatResponse {
+  agent: string;
+  agent_key: string;
+  response: string;
+}
+
+export interface AgentInfo {
+  key: string;
+  name: string;
+  description: string;
+}
+
+export interface AgentLog {
+  id: string;
+  agent_type: string;
+  input: string;
+  output: string;
+  model?: string | null;
+  created_at?: string | null;
+}
+
+export const agentApi = {
+  chat: (userId: string, message: string) =>
+    apiClient.post<AgentChatResponse>('/api/agent/chat', { user_id: userId, message }).then((r) => r.data),
+  list: () =>
+    apiClient.get<AgentInfo[]>('/api/agent/list').then((r) => r.data),
+  logs: (userId: string) =>
+    apiClient.get<AgentLog[]>(`/api/agent/logs/${userId}`).then((r) => r.data),
+};
+
 export default apiClient;
