@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { agentApi } from '../api/services';
+import { agentApi, medicalApi } from '../api/services';
 import type { AgentChatResponse } from '../api/services';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Paperclip } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -23,7 +23,9 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -67,6 +69,66 @@ export default function ChatPage() {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: `📎 上传了文件：${file.name}` },
+    ]);
+
+    try {
+      // 1. 上传文件
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('user_id', userId);
+      formData.append('record_type', file.type.includes('pdf') ? 'pdf' : 'image');
+      formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
+
+      const record = await medicalApi.upload(formData);
+
+      // 2. 显示上传成功
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `✅ 文件「${file.name}」已保存，正在进行 AI 分析...`,
+          agent: 'Medical Analysis Agent',
+          agentKey: 'medical',
+        },
+      ]);
+
+      // 3. 分析文件
+      if (record?.id) {
+        const analysis = await medicalApi.analyze(record.id);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `📋 **分析结果**\n\n${analysis.summary || '暂无摘要'}\n\n**风险等级：** ${analysis.risk_level || '未知'}`,
+            agent: 'Medical Analysis Agent',
+            agentKey: 'medical',
+          },
+        ]);
+      }
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `❌ 文件处理失败：${err.message || '请稍后再试'}`,
+          agent: 'System',
+          agentKey: 'system',
+        },
+      ]);
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -137,14 +199,16 @@ export default function ChatPage() {
           </div>
         ))}
 
-        {loading && (
+        {(loading || uploadingFile) && (
           <div className="flex gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50">
               <Bot className="h-4 w-4 text-primary" />
             </div>
             <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-card border border-border px-4 py-2.5">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">AI 思考中...</span>
+              <span className="text-sm text-muted-foreground">
+                {uploadingFile ? '正在处理文件...' : 'AI 思考中...'}
+              </span>
             </div>
           </div>
         )}
@@ -152,7 +216,7 @@ export default function ChatPage() {
       </div>
 
       {/* Quick Questions */}
-      {messages.length <= 1 && !loading && (
+      {messages.length <= 1 && !loading && !uploadingFile && (
         <div className="px-4 pb-3">
           <p className="text-xs text-muted-foreground mb-2">试试这些问题：</p>
           <div className="flex flex-wrap gap-2">
@@ -172,6 +236,20 @@ export default function ChatPage() {
       {/* Input Bar */}
       <div className="sticky bottom-16 border-t border-border bg-card px-4 py-3">
         <div className="flex items-end gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingFile}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-accent transition-colors"
+          >
+            <Paperclip className="h-5 w-5" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
