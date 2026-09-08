@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { profileApi, medicalApi, medicationApi, diaryApi } from '../api/services';
 import type { Profile as ProfileType } from '../api/services';
@@ -19,6 +20,7 @@ import {
 
 export default function ProfilePage() {
   const { userId, userName } = useApp();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileType | null>(null);
   const [stats, setStats] = useState({ records: 0, medications: 0, diaries: 0 });
   const [editing, setEditing] = useState(false);
@@ -56,6 +58,12 @@ export default function ProfilePage() {
     }
     setEditing(false);
     await loadData();
+  };
+
+  const handleLogout = () => {
+    // Clear all chat history from localStorage
+    localStorage.removeItem(`mary_chat_${userId}`);
+    navigate('/');
   };
 
   const displayName = profile?.full_name || userName || 'User';
@@ -195,6 +203,7 @@ export default function ProfilePage() {
       <section className="px-4 pb-8">
         <button
           type="button"
+          onClick={handleLogout}
           className="flex w-full items-center justify-center rounded-lg border border-destructive bg-transparent px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10"
         >
           Log Out
