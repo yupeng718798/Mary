@@ -45,17 +45,17 @@ export default function ConsultationPage() {
   };
 
   const steps = [
-    { icon: CheckCircle, label: '预约 GP', desc: '建议首先预约全科医生', active: true },
-    { icon: Circle, label: 'GP 初步评估', desc: '医生初步诊断', active: false },
-    { icon: Circle, label: '专科转诊', desc: '如需要获得 Specialist Referral', active: false },
-    { icon: Circle, label: '专科检查', desc: '后续进行专科检查', active: false },
+    { icon: CheckCircle, label: 'Book GP', desc: 'Book an appointment with a GP first', active: true },
+    { icon: Circle, label: 'GP Assessment', desc: 'Initial diagnosis by GP', active: false },
+    { icon: Circle, label: 'Specialist Referral', desc: 'Get a Specialist Referral if needed', active: false },
+    { icon: Circle, label: 'Specialist Check', desc: 'Follow-up specialist examination', active: false },
   ];
 
   const checklist = [
-    '症状持续时间',
-    '检查报告',
-    '当前药物列表',
-    '既往病史',
+    'Duration of symptoms',
+    'Test reports',
+    'Current medication list',
+    'Medical history',
   ];
 
   return (
@@ -63,7 +63,7 @@ export default function ConsultationPage() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-card">
         <div className="flex h-14 items-center px-4">
-          <h1 className="text-[17px] font-semibold text-foreground">问诊导航</h1>
+          <h1 className="text-[17px] font-semibold text-foreground">Consultation Guide</h1>
         </div>
       </header>
 
@@ -71,11 +71,11 @@ export default function ConsultationPage() {
         {/* Symptom Input Card */}
         <section className="card">
           <label htmlFor="symptom-input" className="mb-2 block text-sm font-semibold text-foreground">
-            症状描述
+            Symptom Description
           </label>
           <textarea
             id="symptom-input"
-            placeholder="描述你的症状..."
+            placeholder="Describe your symptoms..."
             rows={3}
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
@@ -91,14 +91,14 @@ export default function ConsultationPage() {
             ) : (
               <Send className="h-4 w-4" />
             )}
-            <span>分析症状</span>
+            <span>Analyze Symptoms</span>
           </button>
         </section>
 
         {/* AI Questions Result */}
         {consultations.length > 0 && consultations[0].ai_questions && (
           <section className="card border-l-[3px] border-l-primary">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Mary AI 建议询问的问题</h2>
+            <h2 className="mb-2 text-sm font-semibold text-foreground">Mary AI Suggested Questions</h2>
             <div className="text-sm text-muted-foreground whitespace-pre-line">
               {consultations[0].ai_questions}
             </div>
@@ -107,7 +107,7 @@ export default function ConsultationPage() {
 
         {/* Healthcare Flow Stepper */}
         <section className="card">
-          <h2 className="mb-4 text-sm font-semibold text-foreground">就诊流程</h2>
+          <h2 className="mb-4 text-sm font-semibold text-foreground">Visit Flow</h2>
           <div className="flex flex-col">
             {steps.map((step, index) => (
               <div key={step.label} className="flex gap-3">
@@ -138,7 +138,7 @@ export default function ConsultationPage() {
 
         {/* Preparation Checklist */}
         <section className="card">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">看诊准备清单</h2>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Preparation Checklist</h2>
           <div className="space-y-3">
             {checklist.map((item) => (
               <div key={item} className="flex items-center gap-3">
@@ -155,8 +155,8 @@ export default function ConsultationPage() {
             <MessageCircle className="h-5 w-5 text-primary-foreground" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">模拟问诊</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">提前和 Mary 练习问诊</p>
+            <p className="text-sm font-semibold text-foreground">Mock Consultation</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Practice with Mary beforehand</p>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
@@ -164,7 +164,7 @@ export default function ConsultationPage() {
         {/* Consultation History */}
         {consultations.length > 0 && (
           <section className="card">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">问诊记录</h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Consultation History</h2>
             <div className="space-y-2">
               {consultations.map((c) => (
                 <div
@@ -179,7 +179,7 @@ export default function ConsultationPage() {
                       {c.symptoms}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {c.created_at ? new Date(c.created_at).toLocaleDateString('zh-CN') : ''}
+                      {c.created_at ? new Date(c.created_at).toLocaleDateString('en-US') : ''}
                     </p>
                   </div>
                   <span
@@ -189,7 +189,7 @@ export default function ConsultationPage() {
                         : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {c.status === 'completed' ? '已完成' : '进行中'}
+                    {c.status === 'completed' ? 'Completed' : 'In Progress'}
                   </span>
                 </div>
               ))}

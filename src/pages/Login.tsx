@@ -30,7 +30,7 @@ export default function Login() {
         <h1 className="text-[clamp(28px,5vw,36px)] font-semibold tracking-tight text-foreground">
           Mary
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">智能健康助手</p>
+        <p className="mt-2 text-sm text-muted-foreground">Smart Health Assistant</p>
       </section>
 
       {/* Login Form */}
@@ -39,7 +39,7 @@ export default function Login() {
           {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm text-muted-foreground">
-              邮箱地址
+              Email Address
             </label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
@@ -57,10 +57,10 @@ export default function Login() {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <label htmlFor="password" className="text-sm text-muted-foreground">
-                密码
+                Password
               </label>
               <a href="#" className="text-xs text-primary whitespace-nowrap">
-                忘记密码?
+                Forgot password?
               </a>
             </div>
             <div className="relative">
@@ -69,12 +69,12 @@ export default function Login() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
-                placeholder="请输入密码"
+                placeholder="Enter password"
                 className="input h-12 pl-10 pr-11"
               />
               <button
                 type="button"
-                aria-label="显示密码"
+                aria-label="Show password"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 transition-colors hover:text-neutral-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -92,15 +92,15 @@ export default function Login() {
             type="submit"
             className="btn-primary mt-2 h-12 w-full active:scale-[0.98] transition-transform duration-150"
           >
-            登录
+            Sign In
           </button>
         </form>
 
         {/* Register link */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          还没有账号？
+          Don't have an account?
           <a href="#" className="font-semibold text-primary whitespace-nowrap ml-1">
-            立即注册
+            Sign Up
           </a>
         </p>
       </section>

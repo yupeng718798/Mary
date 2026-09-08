@@ -2,11 +2,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, FileText, MessageCircle, User, Bot } from 'lucide-react';
 
 const navItems = [
-  { key: 'home', label: '首页', icon: Home, path: '/dashboard' },
-  { key: 'records', label: '病历', icon: FileText, path: '/records' },
+  { key: 'home', label: 'Home', icon: Home, path: '/dashboard' },
+  { key: 'records', label: 'Records', icon: FileText, path: '/records' },
   { key: 'chat', label: 'Mary', icon: Bot, path: '/chat' },
-  { key: 'consult', label: '问诊', icon: MessageCircle, path: '/consultation' },
-  { key: 'profile', label: '我的', icon: User, path: '/profile' },
+  { key: 'consult', label: 'Consult', icon: MessageCircle, path: '/consultation' },
+  { key: 'profile', label: 'Profile', icon: User, path: '/profile' },
 ];
 
 export default function BottomNav() {

@@ -47,32 +47,32 @@ export default function Dashboard() {
   const quickActions = [
     {
       icon: FileText,
-      label: '病历管理',
-      desc: '上传与分析病历',
+      label: 'Medical Records',
+      desc: 'Upload & analyze records',
       path: '/records',
     },
     {
       icon: MapPin,
-      label: '问诊导航',
-      desc: '就医流程指引',
+      label: 'Consultation',
+      desc: 'Visit navigation guide',
       path: '/consultation',
     },
     {
       icon: Pill,
-      label: '药物管理',
-      desc: '药品信息与提醒',
+      label: 'Medications',
+      desc: 'Drug info & reminders',
       path: '/medication',
     },
     {
       icon: BookOpen,
-      label: '症状日记',
-      desc: '每日健康记录',
+      label: 'Symptom Diary',
+      desc: 'Daily health log',
       path: '/medication',
     },
   ];
 
   const pendingCount = records.filter((r) => r.status === 'pending').length;
-  const nextReminder = medications[0]?.reminder_time || '暂无';
+  const nextReminder = medications[0]?.reminder_time || 'None';
 
   return (
     <main className="pb-20">
@@ -81,9 +81,9 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              你好，{userName}
+              Hello, {userName}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">今天感觉怎么样？</p>
+            <p className="mt-1 text-sm text-muted-foreground">How are you feeling today?</p>
           </div>
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50">
             <Bell className="h-5 w-5 text-primary" />
@@ -96,7 +96,7 @@ export default function Dashboard() {
         <section className="px-4 mt-3">
           <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
             <p className="text-xs text-destructive">
-              ⚠️ 后端连接失败: {bootstrapError}
+              Backend connection failed: {bootstrapError}
             </p>
           </div>
         </section>
@@ -105,7 +105,7 @@ export default function Dashboard() {
       {/* Quick Action Grid (2x2) */}
       <section className="px-4 mt-4">
         <h2 className="text-base font-semibold tracking-tight mb-3 text-foreground">
-          快捷功能
+          Quick Actions
         </h2>
         <div className="grid grid-cols-2 gap-3">
           {quickActions.map((action) => (
@@ -131,10 +131,10 @@ export default function Dashboard() {
       {/* Health Summary Section */}
       <section className="px-4 mt-6">
         <h2 className="text-base font-semibold tracking-tight mb-3 text-foreground">
-          健康概览
+          Health Overview
         </h2>
         <div className="flex flex-col gap-3">
-          {/* 待分析报告 */}
+          {/* Pending Analysis */}
           <button
             onClick={() => navigate('/records')}
             className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border border-l-[3px] border-l-primary text-left transition-colors hover:bg-accent"
@@ -144,12 +144,12 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate text-foreground">
-                待分析报告
+                Pending Analysis
               </p>
               <p className="text-xs mt-0.5 text-muted-foreground">
                 {pendingCount > 0
-                  ? `${pendingCount} 份报告等待 AI 分析`
-                  : '暂无待分析报告'}
+                  ? `${pendingCount} report(s) awaiting AI analysis`
+                  : 'No pending reports'}
               </p>
             </div>
             {pendingCount > 0 && (
@@ -161,7 +161,7 @@ export default function Dashboard() {
             )}
           </button>
 
-          {/* 今日服药提醒 */}
+          {/* Today's Medication Reminders */}
           <button
             onClick={() => navigate('/medication')}
             className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border text-left transition-colors hover:bg-accent"
@@ -171,18 +171,18 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate text-foreground">
-                今日服药提醒
+                Today's Medication
               </p>
               <p className="text-xs mt-0.5 text-muted-foreground">
                 {medications.length
-                  ? `下次服药：${nextReminder}`
-                  : '暂无药物提醒'}
+                  ? `Next dose: ${nextReminder}`
+                  : 'No medication reminders'}
               </p>
             </div>
             <div className="h-4 w-4 shrink-0 text-muted-foreground">›</div>
           </button>
 
-          {/* 症状记录 */}
+          {/* Symptom Records */}
           <button
             onClick={() => navigate('/consultation')}
             className="flex items-center gap-3 rounded-lg p-4 bg-card border border-border text-left transition-colors hover:bg-accent"
@@ -192,12 +192,12 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate text-foreground">
-                症状记录
+                Symptom Log
               </p>
               <p className="text-xs mt-0.5 text-muted-foreground">
                 {consultations.length
-                  ? `${consultations.length} 条问诊记录`
-                  : '记录症状，获得 AI 建议'}
+                  ? `${consultations.length} consultation record(s)`
+                  : 'Log symptoms, get AI advice'}
               </p>
             </div>
             <div className="h-4 w-4 shrink-0 text-muted-foreground">›</div>

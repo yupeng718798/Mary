@@ -58,21 +58,21 @@ export default function ProfilePage() {
     await loadData();
   };
 
-  const displayName = profile?.full_name || userName || '用户';
+  const displayName = profile?.full_name || userName || 'User';
   const email = profile?.emergency_contact || 'user@email.com';
 
   const statItems = [
-    { icon: FileText, label: '病历', count: stats.records },
-    { icon: Pill, label: '药品', count: stats.medications },
-    { icon: Calendar, label: '记录', count: stats.diaries },
+    { icon: FileText, label: 'Records', count: stats.records },
+    { icon: Pill, label: 'Meds', count: stats.medications },
+    { icon: Calendar, label: 'Diary', count: stats.diaries },
   ];
 
   const settings = [
-    { icon: Globe, label: '语言设置', value: '中文' },
-    { icon: Bell, label: '通知提醒', toggle: true },
-    { icon: Download, label: '数据导出', value: '导出健康档案' },
-    { icon: Shield, label: '隐私设置' },
-    { icon: Info, label: '关于 Mary', value: '版本 1.0.0' },
+    { icon: Globe, label: 'Language', value: 'English' },
+    { icon: Bell, label: 'Notifications', toggle: true },
+    { icon: Download, label: 'Export Data', value: 'Export health records' },
+    { icon: Shield, label: 'Privacy' },
+    { icon: Info, label: 'About Mary', value: 'Version 1.0.0' },
   ];
 
   return (
@@ -88,13 +88,13 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <input
                   className="input"
-                  placeholder="姓名"
+                  placeholder="Name"
                   value={form.full_name || ''}
                   onChange={(e) => setForm({ ...form, full_name: e.target.value })}
                 />
                 <input
                   className="input"
-                  placeholder="紧急联系人/邮箱"
+                  placeholder="Emergency contact / email"
                   value={form.emergency_contact || ''}
                   onChange={(e) =>
                     setForm({ ...form, emergency_contact: e.target.value })
@@ -102,7 +102,7 @@ export default function ProfilePage() {
                 />
                 <div className="flex gap-2">
                   <button onClick={handleSave} className="btn-primary gap-1 py-1.5 text-xs">
-                    <Check className="h-3 w-3" /> 保存
+                    <Check className="h-3 w-3" /> Save
                   </button>
                   <button
                     onClick={() => {
@@ -111,7 +111,7 @@ export default function ProfilePage() {
                     }}
                     className="btn-secondary gap-1 py-1.5 text-xs"
                   >
-                    <X className="h-3 w-3" /> 取消
+                    <X className="h-3 w-3" /> Cancel
                   </button>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
       {/* Settings List */}
       <section className="px-4 pb-5">
         <h2 className="mb-3 text-sm font-semibold text-muted-foreground tracking-wide">
-          设置
+          Settings
         </h2>
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           {settings.map((item, index) => (
@@ -197,7 +197,7 @@ export default function ProfilePage() {
           type="button"
           className="flex w-full items-center justify-center rounded-lg border border-destructive bg-transparent px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10"
         >
-          退出登录
+          Log Out
         </button>
       </section>
     </main>

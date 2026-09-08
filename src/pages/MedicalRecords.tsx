@@ -39,7 +39,7 @@ export default function MedicalRecords() {
       formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
       const record = await medicalApi.upload(formData);
       await loadRecords();
-      // 上传成功后自动分析
+      // Auto-analyze after upload
       if (record?.id) {
         handleAnalyze(record.id);
       }
@@ -64,7 +64,7 @@ export default function MedicalRecords() {
       return (
         <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-emerald-600">
           <CheckCircle className="h-3 w-3" />
-          已分析
+          Analyzed
         </span>
       );
     }
@@ -72,13 +72,13 @@ export default function MedicalRecords() {
       return (
         <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-amber-600">
           <Loader2 className="h-3 w-3 animate-spin" />
-          分析中...
+          Analyzing...
         </span>
       );
     }
     return (
       <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium whitespace-nowrap text-muted-foreground">
-        待分析
+        Pending
       </span>
     );
   };
@@ -96,7 +96,7 @@ export default function MedicalRecords() {
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
           <h1 className="text-lg font-semibold tracking-tight text-foreground">
-            病历管理
+            Medical Records
           </h1>
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -105,7 +105,7 @@ export default function MedicalRecords() {
           >
             <Upload className="h-4 w-4 shrink-0" />
             <span className="whitespace-nowrap">
-              {uploading ? '上传中...' : '上传病历'}
+              {uploading ? 'Uploading...' : 'Upload'}
             </span>
           </button>
           <input
@@ -127,19 +127,19 @@ export default function MedicalRecords() {
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-50">
             <CloudUpload className="h-5 w-5 text-primary" />
           </div>
-          <span className="text-sm text-muted-foreground">点击或拖拽上传</span>
-          <span className="text-xs text-muted-foreground">支持 PDF、JPG、PNG 格式</span>
+          <span className="text-sm text-muted-foreground">Click or drag to upload</span>
+          <span className="text-xs text-muted-foreground">Supports PDF, JPG, PNG</span>
         </button>
       </section>
 
       {/* Records List */}
       <section className="px-4 pt-5">
-        <h2 className="mb-3 text-sm font-semibold text-muted-foreground">我的病历</h2>
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground">My Records</h2>
 
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">加载中...</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">Loading...</div>
         ) : records.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">暂无病历记录</div>
+          <div className="text-center py-8 text-muted-foreground text-sm">No records yet</div>
         ) : (
           <div className="flex flex-col gap-3">
             {records.map((record) => (
@@ -165,7 +165,7 @@ export default function MedicalRecords() {
                       disabled={analyzingId === record.id}
                       className="text-xs text-primary font-medium whitespace-nowrap hover:underline"
                     >
-                      {analyzingId === record.id ? '分析中...' : 'AI分析'}
+                      {analyzingId === record.id ? 'Analyzing...' : 'AI Analyze'}
                     </button>
                   )}
                   {getStatusBadge(record)}

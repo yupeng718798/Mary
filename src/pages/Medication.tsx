@@ -63,9 +63,9 @@ export default function MedicationPage() {
   };
 
   const tips = [
-    '二甲双胍建议餐中或餐后服用，可减少胃肠不适。',
-    '奥美拉唑需在早餐前30分钟空腹服用，效果最佳。',
-    '阿托伐他汀建议每晚固定时间服用，保持血药浓度稳定。',
+    'Take Metformin with or after meals to reduce GI discomfort.',
+    'Omeprazole works best when taken 30 minutes before breakfast on an empty stomach.',
+    'Atorvastatin is best taken at the same time each evening to maintain stable blood levels.',
   ];
 
   return (
@@ -73,13 +73,13 @@ export default function MedicationPage() {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
         <div className="flex h-14 items-center justify-between px-4">
-          <h1 className="text-lg font-semibold text-foreground">药物管理</h1>
+          <h1 className="text-lg font-semibold text-foreground">Medication Manager</h1>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="btn-primary gap-1.5 py-2"
           >
             <Plus className="h-4 w-4 shrink-0" />
-            <span className="whitespace-nowrap">添加</span>
+            <span className="whitespace-nowrap">Add</span>
           </button>
         </div>
       </header>
@@ -88,40 +88,40 @@ export default function MedicationPage() {
       {showAddForm && (
         <section className="px-4 pt-4">
           <div className="card space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">添加药物</h3>
+            <h3 className="text-sm font-semibold text-foreground">Add Medication</h3>
             <input
-              placeholder="药物名称"
+              placeholder="Medication name"
               className="input"
               value={newMed.medicine_name}
               onChange={(e) => setNewMed({ ...newMed, medicine_name: e.target.value })}
             />
             <input
-              placeholder="剂量 (如: 500mg)"
+              placeholder="Dosage (e.g. 500mg)"
               className="input"
               value={newMed.dosage}
               onChange={(e) => setNewMed({ ...newMed, dosage: e.target.value })}
             />
             <input
-              placeholder="服用频率 (如: 每日两次)"
+              placeholder="Frequency (e.g. Twice daily)"
               className="input"
               value={newMed.frequency}
               onChange={(e) => setNewMed({ ...newMed, frequency: e.target.value })}
             />
             <input
-              placeholder="提醒时间 (如: 08:00)"
+              placeholder="Reminder time (e.g. 08:00)"
               className="input"
               value={newMed.reminder_time}
               onChange={(e) => setNewMed({ ...newMed, reminder_time: e.target.value })}
             />
             <div className="flex gap-2">
               <button onClick={handleAddMedication} className="btn-primary flex-1">
-                保存
+                Save
               </button>
               <button
                 onClick={() => setShowAddForm(false)}
                 className="btn-secondary flex-1"
               >
-                取消
+                Cancel
               </button>
             </div>
           </div>
@@ -130,18 +130,18 @@ export default function MedicationPage() {
 
       {/* Today's Reminders Section */}
       <section className="px-4 pt-5 pb-1">
-        <h2 className="text-base font-semibold text-foreground mb-3">今日服药提醒</h2>
+        <h2 className="text-base font-semibold text-foreground mb-3">Today's Reminders</h2>
 
         {medications.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground text-sm">暂无药物提醒</div>
+          <div className="text-center py-6 text-muted-foreground text-sm">No reminders</div>
         ) : (
           medications.map((med, index) => {
             const status =
               index === 0
-                ? { icon: CheckCircle2, bg: 'bg-emerald-50', text: 'text-emerald-600', label: '已服用' }
+                ? { icon: CheckCircle2, bg: 'bg-emerald-50', text: 'text-emerald-600', label: 'Taken' }
                 : index === 1
-                ? { icon: Clock, bg: 'bg-amber-50', text: 'text-amber-600', label: '待服用' }
-                : { icon: Clock4, bg: 'bg-muted', text: 'text-muted-foreground', label: '即将到时' };
+                ? { icon: Clock, bg: 'bg-amber-50', text: 'text-amber-600', label: 'Pending' }
+                : { icon: Clock4, bg: 'bg-muted', text: 'text-muted-foreground', label: 'Upcoming' };
             return (
               <div
                 key={med.id}
@@ -156,7 +156,7 @@ export default function MedicationPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-foreground truncate">
-                        {med.reminder_time || '未设置'}
+                        {med.reminder_time || 'Not set'}
                       </span>
                       <span
                         className={`inline-flex shrink-0 items-center rounded-md ${status.bg} px-2 py-0.5 text-xs font-medium ${status.text} whitespace-nowrap`}
@@ -173,7 +173,7 @@ export default function MedicationPage() {
                     onClick={() => handleDelete(med.id)}
                     className="text-xs text-destructive hover:underline"
                   >
-                    删除
+                    Delete
                   </button>
                 </div>
               </div>
@@ -184,10 +184,10 @@ export default function MedicationPage() {
 
       {/* My Medications Section */}
       <section className="px-4 pt-4 pb-1">
-        <h2 className="text-base font-semibold text-foreground mb-3">我的药品</h2>
+        <h2 className="text-base font-semibold text-foreground mb-3">My Medications</h2>
 
         {medications.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground text-sm">暂无药品记录</div>
+          <div className="text-center py-6 text-muted-foreground text-sm">No medications recorded</div>
         ) : (
           medications.map((med) => (
             <div
@@ -214,7 +214,7 @@ export default function MedicationPage() {
       {/* Symptom Diary Preview */}
       {diaries.length > 0 && (
         <section className="px-4 pt-4 pb-1">
-          <h2 className="text-base font-semibold text-foreground mb-3">症状日记</h2>
+          <h2 className="text-base font-semibold text-foreground mb-3">Symptom Diary</h2>
           <div className="space-y-2">
             {diaries.slice(0, 3).map((d) => (
               <div
@@ -250,7 +250,7 @@ export default function MedicationPage() {
         <div className="card">
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="h-4 w-4 shrink-0 text-primary" />
-            <h2 className="text-base font-semibold text-foreground">用药小贴士</h2>
+            <h2 className="text-base font-semibold text-foreground">Medication Tips</h2>
           </div>
           <ul className="space-y-2.5">
             {tips.map((tip, i) => (

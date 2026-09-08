@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { agentApi, medicalApi } from '../api/services';
-import type { AgentChatResponse } from '../api/services';
+import { medicalApi } from '../api/services';
 import { Send, Bot, User, Loader2, Paperclip } from 'lucide-react';
+
+const API_BASE = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -11,31 +12,52 @@ interface ChatMessage {
   agentKey?: string;
 }
 
+function getStorageKey(userId: string) {
+  return `mary_chat_${userId}`;
+}
+
 export default function ChatPage() {
   const { userId, userName } = useApp();
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content: `你好，${userName || '用户'}！👋\n\n我是 Mary AI 助手，可以帮你：\n- 📋 查询和分析病历\n- 💊 管理药物和用药提醒\n- 🏥 问诊导航和就医建议\n- 📊 健康总览和综合评估\n\n有什么我可以帮你的吗？`,
-      agent: 'Mary AI',
-      agentKey: 'assistant',
-    },
-  ]);
+
+  const getInitialMessages = (): ChatMessage[] => {
+    try {
+      const saved = localStorage.getItem(getStorageKey(userId));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [
+      {
+        role: 'assistant',
+        content: `Hello, ${userName || 'User'}!\n\nI'm Mary AI Assistant, here to help you with:\n- Query & analyze medical records\n- Manage medications & reminders\n- Consultation navigation & advice\n- Health overview & assessment\n\nHow can I help you today?`,
+        agent: 'Mary AI',
+        agentKey: 'assistant',
+      },
+    ];
+  };
+
+  const [messages, setMessages] = useState<ChatMessage[]>(getInitialMessages);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Persist to localStorage
+  useEffect(() => {
+    localStorage.setItem(getStorageKey(userId), JSON.stringify(messages));
+  }, [messages, userId]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const quickQuestions = [
-    '我的健康状况怎么样？',
-    '帮我看看最近的体检报告',
-    '我头疼应该怎么办？',
-    '我现在在吃什么药？',
+    'How is my health?',
+    'Review my recent lab reports',
+    'What should I do about my headache?',
+    'What medications am I taking?',
   ];
 
   const handleSend = async () => {
@@ -44,25 +66,74 @@ export default function ChatPage() {
 
     setInput('');
     setLoading(true);
-    setMessages((prev) => [...prev, { role: 'user', content: text }]);
+
+    const userMsg: ChatMessage = { role: 'user', content: text };
+    setMessages((prev) => [...prev, userMsg]);
 
     try {
-      const result: AgentChatResponse = await agentApi.chat(userId, text);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: result.response,
-          agent: result.agent,
-          agentKey: result.agent_key,
-        },
-      ]);
+      const response = await fetch(`${API_BASE}/api/agent/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, message: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      // Add placeholder for streaming
+      const placeholderIdx = messages.length + 1;
+      setMessages((prev) => [...prev, { role: 'assistant', content: '', agent: '', agentKey: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'meta') {
+              setMessages((prev) =>
+                prev.map((m, i) =>
+                  i === placeholderIdx
+                    ? { ...m, agent: parsed.agent, agentKey: parsed.agent_key }
+                    : m
+                )
+              );
+            } else if (parsed.type === 'content') {
+              setMessages((prev) =>
+                prev.map((m, i) =>
+                  i === placeholderIdx ? { ...m, content: m.content + parsed.content } : m
+                )
+              );
+            } else if (parsed.type === 'error') {
+              setMessages((prev) =>
+                prev.map((m, i) =>
+                  i === placeholderIdx
+                    ? { ...m, content: `Sorry, error: ${parsed.content}` }
+                    : m
+                )
+              );
+            }
+          } catch {}
+        }
+      }
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: `抱歉，出错了：${err.message || '请稍后再试'}`,
+          content: `Sorry, something went wrong: ${err.message || 'Please try again later'}`,
           agent: 'System',
           agentKey: 'system',
         },
@@ -79,11 +150,10 @@ export default function ChatPage() {
     setUploadingFile(true);
     setMessages((prev) => [
       ...prev,
-      { role: 'user', content: `📎 上传了文件：${file.name}` },
+      { role: 'user', content: `Uploaded: ${file.name}` },
     ]);
 
     try {
-      // 1. 上传文件
       const formData = new FormData();
       formData.append('file', file);
       formData.append('user_id', userId);
@@ -92,25 +162,23 @@ export default function ChatPage() {
 
       const record = await medicalApi.upload(formData);
 
-      // 2. 显示上传成功
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: `✅ 文件「${file.name}」已保存，正在进行 AI 分析...`,
+          content: `File "${file.name}" saved. Running AI analysis...`,
           agent: 'Medical Analysis Agent',
           agentKey: 'medical',
         },
       ]);
 
-      // 3. 分析文件
       if (record?.id) {
         const analysis = await medicalApi.analyze(record.id);
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            content: `📋 **分析结果**\n\n${analysis.summary || '暂无摘要'}\n\n**风险等级：** ${analysis.risk_level || '未知'}`,
+            content: `Analysis Result\n\n${analysis.summary || 'No summary available'}\n\nRisk Level: ${analysis.risk_level || 'Unknown'}`,
             agent: 'Medical Analysis Agent',
             agentKey: 'medical',
           },
@@ -121,7 +189,7 @@ export default function ChatPage() {
         ...prev,
         {
           role: 'assistant',
-          content: `❌ 文件处理失败：${err.message || '请稍后再试'}`,
+          content: `File processing failed: ${err.message || 'Please try again later'}`,
           agent: 'System',
           agentKey: 'system',
         },
@@ -152,8 +220,8 @@ export default function ChatPage() {
             <Bot className="h-4 w-4 text-primary" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-[15px] font-semibold text-foreground">Mary AI 助手</h1>
-            <p className="text-xs text-muted-foreground">智能医疗健康助手</p>
+            <h1 className="text-[15px] font-semibold text-foreground">Mary AI Assistant</h1>
+            <p className="text-xs text-muted-foreground">Smart Healthcare AI</p>
           </div>
         </div>
       </header>
@@ -207,7 +275,7 @@ export default function ChatPage() {
             <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-card border border-border px-4 py-2.5">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <span className="text-sm text-muted-foreground">
-                {uploadingFile ? '正在处理文件...' : 'AI 思考中...'}
+                {uploadingFile ? 'Processing file...' : 'AI thinking...'}
               </span>
             </div>
           </div>
@@ -218,7 +286,7 @@ export default function ChatPage() {
       {/* Quick Questions */}
       {messages.length <= 1 && !loading && !uploadingFile && (
         <div className="px-4 pb-3">
-          <p className="text-xs text-muted-foreground mb-2">试试这些问题：</p>
+          <p className="text-xs text-muted-foreground mb-2">Try asking:</p>
           <div className="flex flex-wrap gap-2">
             {quickQuestions.map((q) => (
               <button
@@ -254,7 +322,7 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="问 Mary 任何健康问题..."
+            placeholder="Ask Mary anything..."
             rows={1}
             className="input resize-none max-h-32 min-h-[44px] py-2.5"
             style={{ height: 'auto' }}
