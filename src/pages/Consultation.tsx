@@ -95,15 +95,20 @@ export default function ConsultationPage() {
           </button>
         </section>
 
-        {/* AI Questions Result */}
-        {consultations.length > 0 && consultations[0].ai_questions && (
-          <section className="card border-l-[3px] border-l-primary">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Mary AI Suggested Questions</h2>
-            <div className="text-sm text-muted-foreground whitespace-pre-line">
-              {consultations[0].ai_questions}
-            </div>
-          </section>
-        )}
+        {/* AI Questions Result — show latest consultation */}
+        {consultations.length > 0 && (() => {
+          const latest = consultations.reduce((a, b) =>
+            new Date(a.created_at || 0) > new Date(b.created_at || 0) ? a : b
+          );
+          return latest.ai_questions ? (
+            <section className="card border-l-[3px] border-l-primary">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">Mary AI Suggested Questions</h2>
+              <div className="text-sm text-muted-foreground whitespace-pre-line">
+                {latest.ai_questions}
+              </div>
+            </section>
+          ) : null;
+        })()}
 
         {/* Healthcare Flow Stepper */}
         <section className="card">
