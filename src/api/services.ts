@@ -90,6 +90,8 @@ export const medicalApi = {
     apiClient.get<MedicalRecord[]>(`/api/medical/records/${userId}`).then((r) => r.data),
   get: (recordId: string) =>
     apiClient.get<MedicalRecord>(`/api/medical/${recordId}`).then((r) => r.data),
+  remove: (recordId: string) =>
+    apiClient.delete<{ message: string }>(`/api/medical/${recordId}`).then((r) => r.data),
   analyze: (recordId: string) =>
     apiClient.post<MedicalAnalysis>(`/api/medical/analyze/${recordId}`).then((r) => r.data),
   getAnalyses: (recordId: string) =>
@@ -111,6 +113,8 @@ export const consultationApi = {
     apiClient.get<Consultation[]>(`/api/consultation/${userId}`).then((r) => r.data),
   update: (consultationId: string, data: Partial<Consultation>) =>
     apiClient.put<Consultation>(`/api/consultation/${consultationId}`, data).then((r) => r.data),
+  remove: (consultationId: string) =>
+    apiClient.delete<{ message: string }>(`/api/consultation/${consultationId}`).then((r) => r.data),
 };
 
 export const medicationApi = {

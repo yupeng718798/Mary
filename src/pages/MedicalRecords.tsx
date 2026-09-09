@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { medicalApi } from '../api/services';
 import type { MedicalRecord } from '../api/services';
-import { Upload, FileText, Image, CheckCircle, Loader2, CloudUpload } from 'lucide-react';
+import { Upload, FileText, Image, CheckCircle, Loader2, CloudUpload, Trash2 } from 'lucide-react';
 
 export default function MedicalRecords() {
   const { userId } = useApp();
@@ -56,6 +56,16 @@ export default function MedicalRecords() {
       await loadRecords();
     } finally {
       setAnalyzingId(null);
+    }
+  };
+
+  const handleDelete = async (recordId: string) => {
+    if (!window.confirm('Delete this record?')) return;
+    try {
+      await medicalApi.remove(recordId);
+      await loadRecords();
+    } catch {
+      // ignore
     }
   };
 
@@ -169,6 +179,13 @@ export default function MedicalRecords() {
                     </button>
                   )}
                   {getStatusBadge(record)}
+                  <button
+                    onClick={() => handleDelete(record.id)}
+                    aria-label="Delete record"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}

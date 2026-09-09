@@ -9,6 +9,7 @@ import {
   MessageCircle,
   ChevronRight,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 
 export default function ConsultationPage() {
@@ -41,6 +42,16 @@ export default function ConsultationPage() {
       await loadConsultations();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (consultationId: string) => {
+    if (!window.confirm('Delete this consultation?')) return;
+    try {
+      await consultationApi.remove(consultationId);
+      await loadConsultations();
+    } catch {
+      // ignore
     }
   };
 
@@ -196,6 +207,13 @@ export default function ConsultationPage() {
                   >
                     {c.status === 'completed' ? 'Completed' : 'In Progress'}
                   </span>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    aria-label="Delete consultation"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               ))}
             </div>

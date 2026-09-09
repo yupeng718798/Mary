@@ -28,7 +28,7 @@ export default function Login() {
 
       {/* Enter Button */}
       <button
-        onClick={() => navigate('/dashboard')}
+        onClick={() => navigate('/chat')}
         className="btn-primary mt-4 h-14 w-56 gap-2 text-base active:scale-[0.98] transition-transform duration-150"
       >
         <span>Enter</span>
